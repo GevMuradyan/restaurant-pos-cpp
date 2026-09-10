@@ -1,0 +1,95 @@
+[Soft Drinks]
+101,Coca-Cola,700
+102,Fanta,700
+103,Sprite,700
+104,Tonic Water,800
+105,Mineral Water,500
+106,Sparkling Water,600
+107,Orange Juice,900
+108,Apple Juice,900
+109,Fresh Orange Juice,1800
+110,Lemonade,1200
+
+[Hot Drinks]
+201,Espresso,800
+202,Double Espresso,1200
+203,Americano,900
+204,Cappuccino,1300
+205,Latte,1400
+206,Flat White,1400
+207,Black Tea,700
+208,Green Tea,700
+209,Herbal Tea,900
+210,Hot Chocolate,1300
+
+[Starters]
+301,Bread Basket,800
+302,Garlic Bread,1400
+303,Cheese Plate,3500
+304,Bruschetta,2200
+305,Fried Mozzarella,2800
+306,Chicken Wings,3200
+307,Shrimp Tempura,4500
+308,Vegetable Plate,2500
+
+[Salads]
+401,Caesar Salad,3200
+402,Caesar Salad Chicken,3900
+403,Greek Salad,3000
+404,Caprese Salad,3300
+405,Avocado Salad,3800
+406,Chicken Salad,3500
+407,Tuna Salad,4200
+408,Garden Salad,2600
+
+[Soups]
+501,Chicken Soup,2200
+502,Mushroom Cream Soup,2600
+503,Tomato Soup,2300
+504,Lentil Soup,2200
+505,Vegetable Soup,2100
+506,Beef Soup,2900
+
+[Main Courses]
+601,Chicken Breast,4800
+602,Chicken Alfredo,5200
+603,Beef Stroganoff,6500
+604,Beef Steak,8500
+605,Salmon Fillet,8200
+606,Fish and Chips,5500
+607,Chicken Schnitzel,4900
+608,Pork Medallions,6200
+609,Vegetable Risotto,4300
+610,Seafood Risotto,6900
+
+[Grill]
+701,Chicken Kebab,4200
+702,Pork Kebab,4800
+703,Beef Kebab,6200
+704,Lamb Kebab,6800
+705,Grilled Chicken,5200
+706,Grilled Vegetables,2800
+707,Grilled Salmon,7900
+708,Mixed Grill,12000
+
+[Pizza and Pasta]
+801,Margherita Pizza,3500
+802,Pepperoni Pizza,4200
+803,Four Cheese Pizza,4600
+804,Chicken Pizza,4400
+805,Vegetable Pizza,3900
+806,Spaghetti Bolognese,4300
+807,Carbonara,4500
+808,Penne Arrabbiata,3800
+809,Fettuccine Alfredo,4600
+810,Seafood Pasta,6500
+
+[Desserts]
+901,Cheesecake,2500
+902,Tiramisu,2700
+903,Chocolate Cake,2400
+904,Ice Cream,1800
+905,Fruit Plate,3200
+906,Chocolate Brownie,2300
+907,Panna Cotta,2400
+908,Apple Pie,2200
