@@ -23,6 +23,20 @@ The project models the core workflow of a real restaurant: restaurant zones and 
 - Table closing only after successful payment
 - Unicode-based POS terminal interface
 
+## Screenshots
+
+### Floor Overview
+
+![Restaurant POS Floor Overview](screenshots/floor-overview.png)
+
+### Customer Bill
+
+![Restaurant POS Customer Bill](screenshots/customer-bill.png)
+
+### Card Payment Terminal
+
+![Restaurant POS Card Payment Terminal](screenshots/card-payment.png)
+
 ## Architecture
 
 The restaurant and menu are modeled using separate object hierarchies:
