@@ -3,3 +3,5 @@ restaurant
 .vscode/
 
 build/
+package/
+*.deb
