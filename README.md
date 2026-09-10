@@ -29,6 +29,12 @@ The project models the core workflow of a real restaurant: restaurant zones and 
 
 ![Restaurant POS Floor Overview](screenshots/floor-overview.png)
 
+### Order Management
+
+Manage an active table order, add or remove items, change quantities, view the current total, and continue to billing or payment.
+
+![Restaurant POS Order Management](screenshots/order-management.png)
+
 ### Customer Bill
 
 ![Restaurant POS Customer Bill](screenshots/customer-bill.png)
