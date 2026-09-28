@@ -1,82 +1,93 @@
 #include "MenuCategory.hpp"
-#include <string>
+
 #include <iostream>
 
-MenuCategory::MenuCategory (const std::string& m_name):name(m_name)
+MenuCategory::MenuCategory(const std::string& name)
+    : name(name)
 {
-
 }
 
-const std::vector<MenuItem>& MenuCategory:: get_items() const
-{
-    return items;
-}
-
-
-const std::string& MenuCategory::get_name()const
+const std::string& MenuCategory::get_name() const
 {
     return name;
 }
 
+const std::vector<MenuItem>& MenuCategory::get_items() const
+{
+    return items;
+}
+
+bool MenuCategory::set_name(const std::string& name)
+{
+    if (name.empty())
+    {
+        return false;
+    }
+
+    this->name = name;
+    return true;
+}
+
 bool MenuCategory::add_item(const MenuItem& item)
 {
-    for(const MenuItem& m_item : items ){
-        if(m_item.get_id() == item.get_id()){
+    for (const MenuItem& existing_item : items)
+    {
+        if (existing_item.get_id() == item.get_id())
+        {
             return false;
-           }
         }
-        
-        items.push_back(item);
-        return true;
+    }
 
-
+    items.push_back(item);
+    return true;
 }
+
 bool MenuCategory::remove_item(int item_id)
 {
-    for(auto it = items.begin(); it != items.end(); ++it){
-        if(it->get_id() == item_id )
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+        if (it->get_id() == item_id)
         {
             items.erase(it);
             return true;
         }
     }
+
     return false;
 }
-    
+
 MenuItem* MenuCategory::find_item_by_id(int item_id)
 {
-
-    for(MenuItem& item : items)
+    for (MenuItem& item : items)
     {
-        if(item.get_id() == item_id)
+        if (item.get_id() == item_id)
         {
             return &item;
         }
     }
-    return nullptr;
 
+    return nullptr;
 }
+
 const MenuItem* MenuCategory::find_item_by_id(int item_id) const
 {
-    for(const MenuItem& item : items)
+    for (const MenuItem& item : items)
     {
-        if(item.get_id() == item_id)
+        if (item.get_id() == item_id)
         {
             return &item;
         }
     }
+
     return nullptr;
-
 }
-        
-void MenuCategory::display()const
-{
-    std::cout<<"====== "<<name<<" ======"<<"\n\n";
 
-    for(const MenuItem& item: items)
+void MenuCategory::display() const
+{
+    std::cout << "====== " << name << " ======\n\n";
+
+    for (const MenuItem& item : items)
     {
         item.display();
     }
-    
 }
-

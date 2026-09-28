@@ -62,7 +62,7 @@ int main()
         return 1;
     }
 
-    run_interface(restaurant, menu);
+    run_interface(restaurant);
 
     return 0;
 }

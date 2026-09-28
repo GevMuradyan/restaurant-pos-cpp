@@ -5,24 +5,22 @@
 
 class MenuItem
 {
-    private:
+private:
+    int id;
+    std::string name;
+    int price;
 
-        int id;
-        std::string name;
-        int price;
+public:
+    MenuItem(int id, const std::string& name, int price);
 
+    int get_id() const;
+    const std::string& get_name() const;
+    int get_price() const;
 
-    public:
+    bool set_name(const std::string& name);
+    bool set_price(int price);
 
-        MenuItem(int id, const std::string& name, int price);
-
-        int get_id()const;
-        const std::string& get_name()const;
-        int get_price()const;
-
-
-
-        void display()const;
+    void display() const;
 };
 
 #endif

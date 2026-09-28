@@ -1,29 +1,62 @@
 #include "MenuItem.hpp"
 
-#include <string>
 #include <iostream>
 
-MenuItem::MenuItem(int m_id, const std::string& m_name, int m_price):id(m_id), name(m_name), price(m_price)
+MenuItem::MenuItem(
+    int id,
+    const std::string& name,
+    int price
+)
+    : id(id),
+      name(name),
+      price(price)
 {
-
 }
 
-int MenuItem::get_id()const
+int MenuItem::get_id() const
 {
     return id;
 }
 
-const std::string& MenuItem::get_name()const
+const std::string& MenuItem::get_name() const
 {
     return name;
 }
 
-int MenuItem::get_price()const
+int MenuItem::get_price() const
 {
     return price;
 }
 
+bool MenuItem::set_name(const std::string& name)
+{
+    if (name.empty())
+    {
+        return false;
+    }
+
+    this->name = name;
+    return true;
+}
+
+bool MenuItem::set_price(int price)
+{
+    if (price < 0)
+    {
+        return false;
+    }
+
+    this->price = price;
+    return true;
+}
+
 void MenuItem::display() const
 {
-    std::cout << id << ". " << name << "    " << price << " AMD\n";
+    std::cout
+        << id
+        << ". "
+        << name
+        << "    "
+        << price
+        << " AMD\n";
 }

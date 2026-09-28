@@ -1,109 +1,115 @@
 #include "Table.hpp"
-#include <iostream>
 
-void display_status(TableStatus status)
-{
-    switch (status)
-    {
-        case TableStatus::Free:
-            std::cout << "Free\n";
-            break;
-
-        case TableStatus::Occupied:
-            std::cout << "Occupied\n";
-            break;
-
-        case TableStatus::CallingWaiter:
-            std::cout << "Calling Waiter\n";
-            break;
-
-        case TableStatus::BillRequested:
-            std::cout << "Bill Requested\n";
-            break;
-
-        default:
-            std::cout << "Unknown status\n";
-    }
-}
-
-Table::Table(int my_table_number, int my_chairs_count)
-    : table_number(my_table_number),
-      chairs_count(my_chairs_count),
+Table::Table(int table_number, int chairs_count)
+    : table_number(table_number),
+      chairs_count(chairs_count),
       clients_count(0),
       status(TableStatus::Free)
 {
 }
 
-void Table::open_table(int my_clients_count)
+bool Table::open_table(int clients_count)
 {
     if (status != TableStatus::Free)
     {
-        std::cout << "Table is not free.\n";
-        return;
+        return false;
     }
 
-    if (my_clients_count <= 0)
+    if (clients_count <= 0)
     {
-        std::cout << "Invalid number of guests.\n";
-        return;
+        return false;
     }
 
-    if (my_clients_count > chairs_count)
+    if (clients_count > chairs_count)
     {
-        std::cout << "Not enough seats at this table.\n";
-        return;
+        return false;
     }
 
     order.emplace();
-    clients_count = my_clients_count;
+
+    this->clients_count = clients_count;
     status = TableStatus::Occupied;
+
+    return true;
 }
 
-void Table::close_table()
+bool Table::call_waiter()
 {
-    if (status == TableStatus::Free)
+    if (status != TableStatus::Occupied)
     {
-        std::cout << "Table is already free.\n";
-        return;
+        return false;
+    }
+
+    status = TableStatus::CallingWaiter;
+
+    return true;
+}
+
+bool Table::request_bill()
+{
+    if (status != TableStatus::Occupied &&
+        status != TableStatus::CallingWaiter)
+    {
+        return false;
     }
 
     if (!order.has_value())
     {
-        std::cout << "Table has no active order.\n";
-        return;
+        return false;
     }
 
-    if(!order->is_paid())
+    if (order->get_items().empty())
     {
-        std::cout<<"The table's bill has not been settled\n";
-        return ;
+        return false;
     }
 
-    
-        status = TableStatus::Free;
-        clients_count = 0;
-        order.reset();
-    
+    status = TableStatus::BillRequested;
+
+    return true;
+}
+
+bool Table::close_table()
+{
+    if (status == TableStatus::Free)
+    {
+        return false;
+    }
+
+    if (!order.has_value())
+    {
+        return false;
+    }
+
+    if (!order->is_paid())
+    {
+        return false;
+    }
+
+    status = TableStatus::Free;
+    clients_count = 0;
+    order.reset();
+
+    return true;
 }
 
 Order* Table::get_order()
 {
-    if(order.has_value())
+    if (!order.has_value())
     {
-    return &order.value();
+        return nullptr;
     }
 
-    return nullptr;
+    return &order.value();
 }
 
-const Order* Table::get_order()const
+const Order* Table::get_order() const
 {
-    if(order.has_value())
+    if (!order.has_value())
     {
-    return &order.value();
+        return nullptr;
     }
 
-    return nullptr;
+    return &order.value();
 }
 
 int Table::get_table_number() const
@@ -124,13 +130,4 @@ int Table::get_clients_count() const
 TableStatus Table::get_status() const
 {
     return status;
-}
-
-void Table::display() const
-{
-    std::cout << "Table #" << table_number << "\n";
-    std::cout << "Seats: " << chairs_count << "\n";
-    std::cout << "Guests: " << clients_count << "\n";
-    std::cout << "Status: ";
-    display_status(status);
 }

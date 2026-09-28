@@ -2,8 +2,8 @@
 #define TABLE_HPP
 
 #include <optional>
-#include "Order.hpp"
 
+#include "Order.hpp"
 
 enum class TableStatus
 {
@@ -13,8 +13,6 @@ enum class TableStatus
     BillRequested
 };
 
-void display_status(TableStatus status);
-
 class Table
 {
 private:
@@ -22,22 +20,24 @@ private:
     int chairs_count;
     int clients_count;
     TableStatus status;
-    std::optional<Order>order;
+    std::optional<Order> order;
 
 public:
-    Table(int my_table_number, int my_chairs_count);
+    Table(int table_number, int chairs_count);
 
-    void open_table(int my_clients_count);
-    void close_table();
+    bool open_table(int clients_count);
+    bool close_table();
+
+    bool call_waiter();
+    bool request_bill();
 
     Order* get_order();
-    const Order* get_order()const;
+    const Order* get_order() const;
+
     int get_table_number() const;
     int get_chairs_count() const;
     int get_clients_count() const;
     TableStatus get_status() const;
-
-    void display() const;
 };
 
 #endif
