@@ -74,10 +74,7 @@ bool Order::is_paid() const
 {
     return paid;
 }
-
-bool Order::start_payment(
-    PaymentMethod method
-)
+bool Order::start_payment(PaymentMethod method)
 {
     if (paid)
         return false;
@@ -88,11 +85,20 @@ bool Order::start_payment(
     if (method == PaymentMethod::None)
         return false;
 
-    if (payment_status != PaymentStatus::None)
+    if (
+        payment_status != PaymentStatus::None &&
+        payment_status != PaymentStatus::Declined &&
+        payment_status != PaymentStatus::Cancelled
+    )
+    {
         return false;
+    }
 
-    payment_method = method;
-    payment_status = PaymentStatus::Processing;
+    payment_method =
+        method;
+
+    payment_status =
+        PaymentStatus::Processing;
 
     return true;
 }
@@ -138,11 +144,19 @@ bool Order::cancel_payment()
     if (paid)
         return false;
 
-    if (payment_status != PaymentStatus::Processing)
+    if (
+        payment_status !=
+        PaymentStatus::Processing
+    )
+    {
         return false;
+    }
 
-    payment_method = PaymentMethod::None;
-    payment_status = PaymentStatus::Cancelled;
+    payment_method =
+        PaymentMethod::None;
+
+    payment_status =
+        PaymentStatus::None;
 
     return true;
 }

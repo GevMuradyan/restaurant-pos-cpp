@@ -26,7 +26,6 @@ add_executable(restaurant
     RestaurantData.cpp
     Transaction.cpp
     CardTerminal.cpp
-    CardTerminal.cpp
 )
 
 target_compile_options(restaurant PRIVATE
@@ -53,7 +52,6 @@ qt_add_executable(ctrl_eat_gui
     OrderItem.cpp
     Order.cpp
     Transaction.cpp
-    CardTerminal.cpp
     CardTerminal.cpp
 
     RestaurantData.cpp

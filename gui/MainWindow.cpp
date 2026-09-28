@@ -1,5 +1,6 @@
 
 #include "MainWindow.hpp"
+#include "CardTerminal.hpp"
 
 #include <QApplication>
 #include <QFrame>
@@ -18,8 +19,12 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QTimeZone>
+#include <QRandomGenerator>
+#include <QStringList>
+#include <QPixmap>
 
 #include <algorithm>
+#include <memory>
 
 // ============================================================
 // CTRL + EAT
@@ -5125,7 +5130,7 @@ QWidget* MainWindow::createPaymentPage(
     );
 
     // ========================================================
-    // MAIN PAYMENT CARD
+    // PAYMENT CARD
     // ========================================================
 
     auto* payment_card =
@@ -5151,9 +5156,9 @@ QWidget* MainWindow::createPaymentPage(
         18
     );
 
-    // --------------------------------------------------------
-    // Title
-    // --------------------------------------------------------
+    // ========================================================
+    // TITLE
+    // ========================================================
 
     payment_layout->addWidget(
         make_label(
@@ -5173,11 +5178,11 @@ QWidget* MainWindow::createPaymentPage(
         )
     );
 
-    // --------------------------------------------------------
-    // Total
-    // --------------------------------------------------------
+    // ========================================================
+    // TOTAL
+    // ========================================================
 
-    auto* order =
+    Order* order =
         table.get_order();
 
     const int total =
@@ -5239,9 +5244,9 @@ QWidget* MainWindow::createPaymentPage(
         total_card
     );
 
-    // --------------------------------------------------------
-    // Payment method
-    // --------------------------------------------------------
+    // ========================================================
+    // PAYMENT METHOD
+    // ========================================================
 
     payment_layout->addWidget(
         make_label(
@@ -5283,12 +5288,12 @@ QWidget* MainWindow::createPaymentPage(
         52
     );
 
-    cash_button->setCursor(
-        Qt::PointingHandCursor
+    cash_button->setCheckable(
+        true
     );
 
-    card_button->setCursor(
-        Qt::PointingHandCursor
+    card_button->setCheckable(
+        true
     );
 
     method_layout->addWidget(
@@ -5305,9 +5310,9 @@ QWidget* MainWindow::createPaymentPage(
         method_layout
     );
 
-    // --------------------------------------------------------
-    // Selected method
-    // --------------------------------------------------------
+    // ========================================================
+    // SELECTED METHOD
+    // ========================================================
 
     auto* selected_method =
         make_label(
@@ -5324,252 +5329,705 @@ QWidget* MainWindow::createPaymentPage(
         selected_method
     );
 
+    // ========================================================
+    // METHOD SELECTION
+    // ========================================================
 
-// --------------------------------------------------------
-// Selection styling
-// --------------------------------------------------------
+    auto select_method =
+        [
+            cash_button,
+            card_button,
+            selected_method
+        ](
+            PaymentMethod method
+        )
+        {
+            const QString selected_style =
+                QString(
+                    "QPushButton {"
+                    "  background: %1;"
+                    "  color: %2;"
+                    "  border: 2px solid %3;"
+                    "  border-radius: 10px;"
+                    "  font-weight: 700;"
+                    "}"
+                ).arg(
+                    GREEN_LIGHT,
+                    GREEN,
+                    GREEN
+                );
 
-cash_button->setCheckable(true);
-card_button->setCheckable(true);
+            const QString normal_style =
+                QString(
+                    "QPushButton {"
+                    "  background: %1;"
+                    "  color: %2;"
+                    "  border: 1px solid %3;"
+                    "  border-radius: 10px;"
+                    "  font-weight: 600;"
+                    "}"
+                    "QPushButton:hover {"
+                    "  background: %4;"
+                    "}"
+                ).arg(
+                    WHITE,
+                    TEXT,
+                    BORDER,
+                    "#f0f0f0"
+                );
 
-auto select_method =
-    [
+            cash_button->setStyleSheet(
+                method == PaymentMethod::Cash
+                    ? selected_style
+                    : normal_style
+            );
+
+            card_button->setStyleSheet(
+                method == PaymentMethod::Card
+                    ? selected_style
+                    : normal_style
+            );
+
+            cash_button->setChecked(
+                method == PaymentMethod::Cash
+            );
+
+            card_button->setChecked(
+                method == PaymentMethod::Card
+            );
+
+            if (
+                method ==
+                PaymentMethod::Cash
+            )
+            {
+                selected_method->setText(
+                    "Cash payment selected"
+                );
+            }
+            else
+            {
+                selected_method->setText(
+                    "Card payment selected"
+                );
+            }
+
+            selected_method->setStyleSheet(
+                QString(
+                    "QLabel {"
+                    "  color: %1;"
+                    "  font-weight: 600;"
+                    "}"
+                ).arg(GREEN)
+            );
+        };
+
+    connect(
         cash_button,
-        card_button,
-        selected_method
-    ](
-        PaymentMethod method
-    )
-    {
-        const QString selected_style =
-            QString(
-                "QPushButton {"
-                "  background: %1;"
-                "  color: %2;"
-                "  border: 2px solid %3;"
-                "  border-radius: 10px;"
-                "  font-weight: 700;"
-                "}"
-            ).arg(
-                GREEN_LIGHT,
-                GREEN,
-                GREEN
+        &QPushButton::clicked,
+        this,
+        [
+            select_method
+        ]()
+        {
+            select_method(
+                PaymentMethod::Cash
             );
-
-        const QString normal_style =
-            QString(
-                "QPushButton {"
-                "  background: %1;"
-                "  color: %2;"
-                "  border: 1px solid %3;"
-                "  border-radius: 10px;"
-                "  font-weight: 600;"
-                "}"
-                "QPushButton:hover {"
-                "  background: %4;"
-                "}"
-            ).arg(
-                WHITE,
-                TEXT,
-                BORDER,
-                "#f0f0f0"
-            );
-
-        cash_button->setStyleSheet(
-            method == PaymentMethod::Cash
-                ? selected_style
-                : normal_style
-        );
-
-        card_button->setStyleSheet(
-            method == PaymentMethod::Card
-                ? selected_style
-                : normal_style
-        );
-
-        cash_button->setChecked(
-            method == PaymentMethod::Cash
-        );
-
-        card_button->setChecked(
-            method == PaymentMethod::Card
-        );
-
-        selected_method->setText(
-            method == PaymentMethod::Cash
-                ? "Cash payment selected"
-                : "Card payment selected"
-        );
-
-        selected_method->setStyleSheet(
-            QString(
-                "QLabel {"
-                "  color: %1;"
-                "  font-weight: 600;"
-                "}"
-            ).arg(GREEN)
-        );
-    };
-
-connect(
-    cash_button,
-    &QPushButton::clicked,
-    this,
-    [
-        select_method
-    ]()
-    mutable
-    {
-        select_method(
-            PaymentMethod::Cash
-        );
-    }
-);
-
-connect(
-    card_button,
-    &QPushButton::clicked,
-    this,
-    [
-        select_method
-    ]()
-    mutable
-    {
-        select_method(
-            PaymentMethod::Card
-        );
-    }
-);
-
-// --------------------------------------------------------
-// Separator
-// --------------------------------------------------------
-
-auto* separator =
-    new QFrame;
-
-separator->setFrameShape(
-    QFrame::HLine
-);
-
-separator->setStyleSheet(
-    QString(
-        "QFrame {"
-        "  color: %1;"
-        "  background: %1;"
-        "  max-height: 1px;"
-        "}"
-    ).arg(BORDER)
-);
-
-payment_layout->addWidget(
-    separator
-);
-
-// --------------------------------------------------------
-// Confirm
-// --------------------------------------------------------
-
-auto* confirm_button =
-    make_button(
-        "CONFIRM PAYMENT",
-        GREEN,
-        WHITE
+        }
     );
 
-confirm_button->setMinimumHeight(
-    48
-);
-
-connect(
-    confirm_button,
-    &QPushButton::clicked,
-    this,
-    [
+    connect(
+        card_button,
+        &QPushButton::clicked,
         this,
-        zone_name,
-        table_number,
-        cash_button,
-        card_button
-    ]()
-    {
-        PaymentMethod selected_method_value =
-            PaymentMethod::None;
-
-        if (cash_button->isChecked())
+        [
+            select_method
+        ]()
         {
-            selected_method_value =
-                PaymentMethod::Cash;
-        }
-        else if (card_button->isChecked())
-        {
-            selected_method_value =
-                PaymentMethod::Card;
-        }
-
-        if (
-            selected_method_value ==
-            PaymentMethod::None
-        )
-        {
-            return;
-        }
-
-        Zone* zone_ptr =
-            restaurant
-                .get_zone_by_name(
-                    zone_name.toStdString()
-                );
-
-        if (!zone_ptr)
-            return;
-
-        Table* table_ptr =
-            zone_ptr
-                ->get_table_by_number(
-                    table_number
-                );
-
-        if (!table_ptr)
-            return;
-
-        Order* order_ptr =
-            table_ptr->get_order();
-
-        if (!order_ptr)
-            return;
-
-        if (
-            order_ptr->pay_for_order(
-                selected_method_value
-            )
-        )
-        {
-            showTablePage(
-                *zone_ptr,
-                *table_ptr
+            select_method(
+                PaymentMethod::Card
             );
         }
-    }
-);
+    );
 
-payment_layout->addWidget(
-    confirm_button
-);
+    // ========================================================
+    // PROCESSING UI
+    // ========================================================
 
-payment_layout->addStretch();
+    auto* processing_label =
+        make_label(
+            "",
+            12,
+            MUTED,
+            QFont::DemiBold
+        );
 
-outer->addWidget(
-    payment_card,
-    0,
-    Qt::AlignHCenter
-);
+    processing_label->setAlignment(
+        Qt::AlignCenter
+    );
 
-outer->addStretch();
+    processing_label->setVisible(
+        false
+    );
 
-return page;
+    payment_layout->addWidget(
+        processing_label
+    );
+
+    auto* spinner_label =
+        make_label(
+            "",
+            28,
+            GREEN,
+            QFont::Bold
+        );
+
+    spinner_label->setAlignment(
+        Qt::AlignCenter
+    );
+
+    spinner_label->setVisible(
+        false
+    );
+
+    payment_layout->addWidget(
+        spinner_label
+    );
+
+    // ========================================================
+    // SEPARATOR
+    // ========================================================
+
+    auto* separator =
+        new QFrame;
+
+    separator->setFrameShape(
+        QFrame::HLine
+    );
+
+    separator->setFrameShadow(
+        QFrame::Plain
+    );
+
+    separator->setStyleSheet(
+        QString(
+            "QFrame {"
+            "  color: %1;"
+            "  background: %1;"
+            "  max-height: 1px;"
+            "}"
+        ).arg(BORDER)
+    );
+
+    payment_layout->addWidget(
+        separator
+    );
+
+    // ========================================================
+    // CONFIRM BUTTON
+    // ========================================================
+
+    auto* confirm_button =
+        make_button(
+            "CONFIRM PAYMENT",
+            GREEN,
+            WHITE
+        );
+
+    confirm_button->setMinimumHeight(
+        48
+    );
+
+    payment_layout->addWidget(
+        confirm_button
+    );
+
+    // ========================================================
+    // CARD TERMINAL
+    // ========================================================
+
+    auto terminal =
+        std::make_shared<CardTerminal>();
+
+    auto spinner_index =
+        std::make_shared<int>(0);
+
+    const QStringList spinner_frames = {
+        "◐",
+        "◓",
+        "◑",
+        "◒"
+    };
+
+    auto* spinner_timer =
+        new QTimer(page);
+
+    spinner_timer->setInterval(
+        180
+    );
+
+    connect(
+        spinner_timer,
+        &QTimer::timeout,
+        page,
+        [
+            spinner_label,
+            spinner_index,
+            spinner_frames
+        ]()
+        {
+            if (spinner_frames.isEmpty())
+                return;
+
+            spinner_label->setText(
+                spinner_frames.at(
+                    *spinner_index
+                )
+            );
+
+            *spinner_index =
+                (
+                    *spinner_index + 1
+                ) %
+                spinner_frames.size();
+        }
+    );
+
+    // ========================================================
+    // CONFIRM PAYMENT
+    // ========================================================
+
+    connect(
+        confirm_button,
+        &QPushButton::clicked,
+        this,
+        [
+            this,
+            page,
+            zone_name,
+            table_number,
+            cash_button,
+            card_button,
+            selected_method,
+            processing_label,
+            spinner_label,
+            spinner_timer,
+            confirm_button,
+            terminal,
+            spinner_index
+
+        ]()
+        {
+            PaymentMethod selected_method_value =
+                PaymentMethod::None;
+
+            if (
+                cash_button->isChecked()
+            )
+            {
+                selected_method_value =
+                    PaymentMethod::Cash;
+            }
+            else if (
+                card_button->isChecked()
+            )
+            {
+                selected_method_value =
+                    PaymentMethod::Card;
+            }
+
+            // ------------------------------------------------
+            // No method selected
+            // ------------------------------------------------
+
+            if (
+                selected_method_value ==
+                PaymentMethod::None
+            )
+            {
+                selected_method->setText(
+                    "Please select a payment method"
+                );
+
+                selected_method->setStyleSheet(
+                    QString(
+                        "QLabel {"
+                        "  color: %1;"
+                        "  font-weight: 600;"
+                        "}"
+                    ).arg(RED)
+                );
+
+                return;
+            }
+
+            Zone* zone_ptr =
+                restaurant
+                    .get_zone_by_name(
+                        zone_name.toStdString()
+                    );
+
+            if (!zone_ptr)
+                return;
+
+            Table* table_ptr =
+                zone_ptr
+                    ->get_table_by_number(
+                        table_number
+                    );
+
+            if (!table_ptr)
+                return;
+
+            Order* order_ptr =
+                table_ptr->get_order();
+
+            if (!order_ptr)
+                return;
+
+            // =================================================
+            // CASH PAYMENT
+            // =================================================
+
+            if (
+                selected_method_value ==
+                PaymentMethod::Cash
+            )
+            {
+                if (
+                    order_ptr->pay_for_order(
+                        PaymentMethod::Cash
+                    )
+                )
+                {
+                    showTablePage(
+                        *zone_ptr,
+                        *table_ptr
+                    );
+                }
+
+                return;
+            }
+
+            // =================================================
+            // CARD PAYMENT
+            // =================================================
+
+            if (
+                !order_ptr->start_payment(
+                    PaymentMethod::Card
+                )
+            )
+            {
+                return;
+            }
+
+            if (
+                !terminal->start_payment()
+            )
+            {
+                return;
+            }
+
+            confirm_button->setEnabled(
+                false
+            );
+
+            cash_button->setEnabled(
+                false
+            );
+
+            card_button->setEnabled(
+                false
+            );
+
+            processing_label->setVisible(
+                true
+            );
+
+            spinner_label->setVisible(
+                true
+            );
+
+            processing_label->setText(
+                "Connecting to card terminal..."
+            );
+
+            processing_label->setStyleSheet(
+                QString(
+                    "QLabel {"
+                    "  color: %1;"
+                    "  font-weight: 600;"
+                    "}"
+                ).arg(MUTED)
+            );
+
+            spinner_label->setStyleSheet(
+                QString(
+                    "QLabel {"
+                    "  color: %1;"
+                    "  font-weight: 700;"
+                    "}"
+                ).arg(GREEN)
+            );
+
+            *spinner_index = 0;
+
+            spinner_timer->start();
+
+            // 2–4 seconds
+
+            const int delay =
+                QRandomGenerator::global()
+                    ->bounded(
+                        2000,
+                        4001
+                    );
+
+            QTimer::singleShot(
+                delay,
+                page,
+                [
+                    this,
+                    zone_name,
+                    table_number,
+                    order_ptr,
+                    processing_label,
+                    spinner_label,
+                    spinner_timer,
+                    confirm_button,
+                    cash_button,
+                    card_button,
+                    terminal
+                ]()
+                {
+                    spinner_timer->stop();
+
+                    terminal->process_payment();
+
+                    const CardTerminalStatus status =
+                        terminal->get_status();
+
+                    // =========================================
+                    // APPROVED
+                    // =========================================
+
+                    if (
+                        status ==
+                        CardTerminalStatus::Approved
+                    )
+                    {
+                        if (
+                            order_ptr
+                                ->approve_payment()
+                        )
+                        {
+                            processing_label->setText(
+                                "PAYMENT APPROVED"
+                            );
+
+                            processing_label->setStyleSheet(
+                                QString(
+                                    "QLabel {"
+                                    "  color: %1;"
+                                    "  font-weight: 700;"
+                                    "}"
+                                ).arg(GREEN)
+                            );
+
+                            spinner_label->setText(
+                                "✓"
+                            );
+
+                            spinner_label->setStyleSheet(
+                                QString(
+                                    "QLabel {"
+                                    "  color: %1;"
+                                    "  font-weight: 700;"
+                                    "}"
+                                ).arg(GREEN)
+                            );
+
+                            QTimer::singleShot(
+                                700,
+                                this,
+                                [
+                                    this,
+                                    zone_name,
+                                    table_number
+                                ]()
+                                {
+                                    Zone* zone_ptr =
+                                        restaurant
+                                            .get_zone_by_name(
+                                                zone_name.toStdString()
+                                            );
+
+                                    if (!zone_ptr)
+                                        return;
+
+                                    Table* table_ptr =
+                                        zone_ptr
+                                            ->get_table_by_number(
+                                                table_number
+                                            );
+
+                                    if (!table_ptr)
+                                        return;
+
+                                    showTablePage(
+                                        *zone_ptr,
+                                        *table_ptr
+                                    );
+                                }
+                            );
+
+                            return;
+                        }
+                    }
+
+                    // =========================================
+                    // DECLINED
+                    // =========================================
+
+                    if (
+                        status ==
+                        CardTerminalStatus::Declined
+                    )
+                    {
+                        order_ptr
+                            ->decline_payment();
+
+                        processing_label->setText(
+                            "PAYMENT DECLINED"
+                        );
+
+                        processing_label->setStyleSheet(
+                            QString(
+                                "QLabel {"
+                                "  color: %1;"
+                                "  font-weight: 700;"
+                                "}"
+                            ).arg(RED)
+                        );
+
+                        spinner_label->setText(
+                            "✕"
+                        );
+
+                        spinner_label->setStyleSheet(
+                            QString(
+                                "QLabel {"
+                                "  color: %1;"
+                                "  font-weight: 700;"
+                                "}"
+                            ).arg(RED)
+                        );
+
+                        confirm_button->setText(
+                            "TRY AGAIN"
+                        );
+
+                        confirm_button->setEnabled(
+                            true
+                        );
+
+                        cash_button->setEnabled(
+                            true
+                        );
+
+                        card_button->setEnabled(
+                            true
+                        );
+
+                        return;
+                    }
+
+                    // =========================================
+                    // CONNECTION ERROR
+                    // =========================================
+
+                    if (
+                        status ==
+                        CardTerminalStatus::ConnectionError
+                    )
+                    {
+                        order_ptr
+                            ->cancel_payment();
+
+                        processing_label->setText(
+                            "CONNECTION ERROR"
+                        );
+
+                        processing_label->setStyleSheet(
+                            QString(
+                                "QLabel {"
+                                "  color: %1;"
+                                "  font-weight: 700;"
+                                "}"
+                            ).arg(ORANGE)
+                        );
+
+                        spinner_label->setText(
+                            "!"
+                        );
+
+                        spinner_label->setStyleSheet(
+                            QString(
+                                "QLabel {"
+                                "  color: %1;"
+                                "  font-weight: 700;"
+                                "}"
+                            ).arg(ORANGE)
+                        );
+
+                        confirm_button->setText(
+                            "TRY AGAIN"
+                        );
+
+                        confirm_button->setEnabled(
+                            true
+                        );
+
+                        cash_button->setEnabled(
+                            true
+                        );
+
+                        card_button->setEnabled(
+                            true
+                        );
+
+                        return;
+                    }
+
+                    confirm_button->setEnabled(
+                        true
+                    );
+
+                    cash_button->setEnabled(
+                        true
+                    );
+
+                    card_button->setEnabled(
+                        true
+                    );
+                }
+            );
+        }
+    );
+
+    payment_layout->addStretch();
+
+    outer->addWidget(
+        payment_card,
+        0,
+        Qt::AlignHCenter
+    );
+
+    outer->addStretch();
+
+    return page;
 }
-
 
 // ============================================================
 // Payment Page Navigation
